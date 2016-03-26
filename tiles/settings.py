@@ -53,7 +53,10 @@ MIDDLEWARE_CLASSES = [
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "asgiref.inmemory.ChannelLayer",
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+	"CONFIG": {
+		"hosts": [("localhost", 6379)],
+	},
         "ROUTING": "tiles.routing.channel_routing",
     },
 }
@@ -75,6 +78,7 @@ TEMPLATES = [
         },
     },
 ]
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]

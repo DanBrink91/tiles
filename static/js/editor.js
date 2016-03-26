@@ -70,7 +70,7 @@ var map = {
 canvas.width = map.width;
 canvas.height = map.height;
 
-var socket = new WebSocket("ws://" + window.location.host + "/chat/");
+var socket = new WebSocket("ws://" + window.location.host + "/chat/");\
 socket.onmessage = function(e) {
     var msg = JSON.parse(e.data);
     switch(msg.event) {
