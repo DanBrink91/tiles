@@ -48,7 +48,7 @@ var map = {
 canvas.width = map.width;
 canvas.height = map.height;
 
-var socket = new WebSocket("ws://127.0.0.1:8000/chat/");
+var socket = new WebSocket("ws://45.55.190.219:8080/chat/");
 socket.onmessage = function(e) {
     var msg = JSON.parse(e.data);
     switch(msg.event) {
