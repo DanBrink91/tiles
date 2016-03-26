@@ -1,6 +1,7 @@
 // Editor.js
 var canvas = document.getElementById("editorCanvas");
 var ctx = canvas.getContext('2d');
+var visitorsEl = document.getElementById("activeUsers");
 
 var activeTile = 0;
 var activeLayer = 0;
@@ -89,6 +90,9 @@ socket.onmessage = function(e) {
     		map.data = JSON.parse(msg.tiles);
     		map.render();
     	break;
+    	case 'visitors':
+    		activeUsers.innerHTML = msg.count + " active users currently"
+    	break;
     }
 }
 socket.onopen = function() {
@@ -118,21 +122,18 @@ for(var tile_index in tile_images) {
 }
 
 canvas.onmousedown = function(e) {
-	console.log("mouse down");
 	mouseDown = true;
 }
 document.onmouseup = function(e) {
-	console.log("mouse up");
 	mouseDown = false;
 }
 canvas.onmousemove = function(e) {
-	console.log("mouse over");
 	e.preventDefault();
 	var needsDraw = false;
 	var rect = canvas.getBoundingClientRect();
-	var new_x_index = Math.floor((e.pageX - rect.left) / map.tileSize);
-	var new_y_index = Math.floor((e.pageY - rect.top) / map.tileSize);
-	
+	var new_x_index = Math.floor((e.clientX - rect.left) / map.tileSize);
+	var new_y_index = Math.floor((e.clientY - rect.top) / map.tileSize);
+
 	if(new_x_index !== map.activeTileX_index || 
 		new_y_index !== map.activeTileY_index){
 		map.activeTileX_index = new_x_index;
