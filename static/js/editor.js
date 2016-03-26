@@ -4,6 +4,7 @@ var ctx = canvas.getContext('2d');
 
 var activeTile = 0;
 var activeLayer = 0;
+var mouseDown = false;
 var map = {
 	width: 800,
 	height: 800,
@@ -12,6 +13,7 @@ var map = {
 	tileSize: 32,
 	activeTileX_index: 0,
 	activeTileY_index: 0,
+	hideGride: false,
 	init: function() {
 		this.data = [];
 		var column_count = this.height / this.tileSize;
@@ -33,6 +35,7 @@ var map = {
 		var column_count = this.height / this.tileSize;
 		var row_count = this.width / this.tileSize;
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		ctx.strokeStyle = "black";
 		for(var i = 0; i < this.layerNames.length; i++) {
 			for(var y = 0; y < column_count; y++) {
 				for(var x = 0; x < row_count; x++) {
@@ -41,14 +44,33 @@ var map = {
 				}
 			}
 		}
+		if(!this.hideGride) this.drawGrid();
+		ctx.strokeStyle = "red";
 		ctx.strokeRect(this.activeTileX_index * this.tileSize, this.activeTileY_index * this.tileSize, this.tileSize, this.tileSize);
+	},
+	drawGrid: function() {
+		var column_count = this.height / this.tileSize;
+		var row_count = this.width / this.tileSize;
+		
+		for(var y = 1; y < column_count; y++) {
+			ctx.beginPath();
+			ctx.moveTo(0, y * this.tileSize);
+			ctx.lineTo(this.width, y*this.tileSize);
+			ctx.stroke();
+		}
+		for(var x = 1; x < row_count; x++) {
+			ctx.beginPath();
+			ctx.moveTo(x * this.tileSize, 0);
+			ctx.lineTo(x*this.tileSize, this.height);
+			ctx.stroke();
+		}
 	}
 };
 
 canvas.width = map.width;
 canvas.height = map.height;
 
-var socket = new WebSocket("ws://127.0.0.1:8000/chat/");
+var socket = new WebSocket("ws://" + window.location.host + "/chat/");
 socket.onmessage = function(e) {
     var msg = JSON.parse(e.data);
     switch(msg.event) {
@@ -95,28 +117,43 @@ for(var tile_index in tile_images) {
 	tile.onclick = tileOnClickFunc(tile_index);
 }
 
-canvas.onclick = function(e) {
+canvas.onmousedown = function(e) {
+	console.log("mouse down");
+	mouseDown = true;
+}
+document.onmouseup = function(e) {
+	console.log("mouse up");
+	mouseDown = false;
+}
+canvas.onmousemove = function(e) {
+	console.log("mouse over");
 	e.preventDefault();
 	var needsDraw = false;
 	var rect = canvas.getBoundingClientRect();
 	var new_x_index = Math.floor((e.pageX - rect.left) / map.tileSize);
 	var new_y_index = Math.floor((e.pageY - rect.top) / map.tileSize);
 	
-	var oldTile = map.data[activeLayer][new_x_index][new_y_index];
-	if(oldTile !== activeTile) {
-		needsDraw = true;
-		map.data[activeLayer][new_x_index][new_y_index] = activeTile;
-		var msg = JSON.stringify({"layer": activeLayer, "tile_y": new_y_index, "tile_x": new_x_index, "tile": activeTile, "event": "change"});
-		socket.send(msg);
-	}
 	if(new_x_index !== map.activeTileX_index || 
 		new_y_index !== map.activeTileY_index){
 		map.activeTileX_index = new_x_index;
 		map.activeTileY_index = new_y_index;
 		needsDraw = true;
 	}
+	
+	var oldTile = map.data[activeLayer][new_x_index][new_y_index];
+	if(oldTile !== activeTile && mouseDown) {
+		needsDraw = true;
+		map.data[activeLayer][new_x_index][new_y_index] = activeTile;
+		var msg = JSON.stringify({"layer": activeLayer, "tile_y": new_y_index, "tile_x": new_x_index, "tile": activeTile, "event": "change"});
+		socket.send(msg);
+	}
 	if(needsDraw)
 		map.render();
+}
+
+document.getElementById("showGridEl").onchange = function(e) {
+	map.hideGride = !this.checked;
+	map.render();
 }
 map.init();
 map.render();

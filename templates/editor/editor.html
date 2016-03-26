@@ -4,12 +4,16 @@
 </head>
 
 <body>
-	<div id="activeUsers"></div>
+	<div id="activeUsers">
+	</div>
 	<div id="editor">
 		<div id="tileSet">
 		{% for tile in tiles %}
 			<img src="{% static "img/"|add:tile %}" class="tileset-tile"/>
 		{% endfor %}
+		</div>
+		<div id="options">
+			<label>Show Grid <input type="checkbox" id="showGridEl" checked/></label>
 		</div>
 		<div id="canvasContainer">
 			<canvas id="editorCanvas">
