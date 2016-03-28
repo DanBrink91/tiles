@@ -6,5 +6,5 @@ channel_routing  = [
 	route('http.request', StaticFilesConsumer()),
 	route('websocket.connect', ws_add),
 	route("websocket.receive", ws_message),
-	route('websocket.disconnet', ws_disconnect),
+	route('websocket.disconnect', ws_disconnect),
 ]
